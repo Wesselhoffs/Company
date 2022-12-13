@@ -1,97 +1,74 @@
-﻿namespace Company.API.Controllers;
+﻿using Company.Data.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
-[Route("api/[controller]")]
-[ApiController]
-public class CompanyController : ControllerBase
+// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+
+namespace Company.API.Controllers
 {
-    private readonly CompanyContext _context;
-
-    public CompanyController(CompanyContext context)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class CompanyController : ControllerBase
     {
-        _context = context;
-    }
+        private readonly IDbService _db;
 
-    // GET: api/Company
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<Data.Entities.Company>>> GetCompanies()
-    {
-        return await _context.Companies.ToListAsync();
-    }
-
-    // GET: api/Company/5
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Data.Entities.Company>> GetCompany(int id)
-    {
-        var company = await _context.Companies.FindAsync(id);
-
-        if (company == null)
+        public CompanyController(IDbService dbService)
         {
-            return NotFound();
+            _db = dbService;
         }
 
-        return company;
-    }
-
-    // PUT: api/Company/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPut("{id}")]
-    public async Task<IActionResult> PutCompany(int id, Data.Entities.Company company)
-    {
-        if (id != company.Id)
+        // GET: api/<CompanyController>
+        [HttpGet]
+        public async Task<IResult> Get()
         {
-            return BadRequest();
+            return Results.Ok(await _db.GetAsync<Data.Entities.Company, CompanyDTO>());
         }
 
-        _context.Entry(company).State = EntityState.Modified;
-
-        try
+        // GET api/<CompanyController>/5
+        [HttpGet("{id}")]
+        public async Task<IResult> Get(int id)
         {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!CompanyExists(id))
+            var result = await _db.SingleAsync<Data.Entities.Company, CompanyDTO>(c => c.Id.Equals(id));
+            if (result is null)
             {
-                return NotFound();
+                return Results.NotFound();
             }
             else
             {
-                throw;
+                return Results.Ok(result);
             }
         }
 
-        return NoContent();
-    }
-
-    // POST: api/Company
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPost]
-    public async Task<ActionResult<Data.Entities.Company>> PostCompany(Data.Entities.Company company)
-    {
-        _context.Companies.Add(company);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction("GetCompany", new { id = company.Id }, company);
-    }
-
-    // DELETE: api/Company/5
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteCompany(int id)
-    {
-        var company = await _context.Companies.FindAsync(id);
-        if (company == null)
+        // POST api/<CompanyController>
+        [HttpPost]
+        public async Task<IResult> Post([FromBody] CompanyDTO dto)
         {
-            return NotFound();
+            try
+            {
+                var entity = await _db.AddAsync<Data.Entities.Company, CompanyDTO>(dto);
+                if (await _db.SaveChangesAsync())
+                {
+                    var node = typeof(Data.Entities.Company).Name.ToLower();                   
+                    return Results.Created($"/{node}/{entity.Id}",entity);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Results.BadRequest($"Couldn't add the {typeof(Data.Entities.Company).Name} entity.\n{ex}.");
+            }
+            return Results.BadRequest($"Couldn't add the {typeof(Data.Entities.Company).Name}entity.");
+
         }
 
-        _context.Companies.Remove(company);
-        await _context.SaveChangesAsync();
+        // PUT api/<CompanyController>/5
+        [HttpPut("{id}")]
+        public void Put(int id, [FromBody] string value)
+        {
+        }
 
-        return NoContent();
-    }
-
-    private bool CompanyExists(int id)
-    {
-        return _context.Companies.Any(e => e.Id == id);
+        // DELETE api/<CompanyController>/5
+        [HttpDelete("{id}")]
+        public void Delete(int id)
+        {
+        }
     }
 }

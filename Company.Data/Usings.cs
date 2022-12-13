@@ -5,4 +5,5 @@ global using Company.Data.Services;
 global using System.ComponentModel.DataAnnotations;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Design;
-global using System.Linq;
+global using System.Linq.Expressions;
+global using AutoMapper;
