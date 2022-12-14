@@ -12,7 +12,7 @@ public class DbService : IDbService
     }
 
 
-    async Task<List<TDto>> IDbService.GetAsync<TEntity, TDto>()
+    public async Task<List<TDto>> GetAsync<TEntity, TDto>() where TEntity : class, IEntity where TDto : class
     {
         var entities = await _db.Set<TEntity>().ToListAsync();
         return _mapper.Map<List<TDto>>(entities);
@@ -23,26 +23,32 @@ public class DbService : IDbService
         return await _db.Set<TEntity>().SingleOrDefaultAsync(expression);
     }
 
-    async Task<TDto> IDbService.SingleAsync<TEntity, TDto>(Expression<Func<TEntity, bool>> expression)
+    public async Task<TDto> SingleAsync<TEntity, TDto>(Expression<Func<TEntity, bool>> expression) where TEntity : class, IEntity where TDto : class
     {
         var entity = await SingleAsync(expression);
         return _mapper.Map<TDto>(entity);
     }
 
-    async Task<bool> IDbService.AnyAsync<TEntity>(Expression<Func<TEntity, bool>> expression)
+    public async Task<bool> AnyAsync<TEntity>(Expression<Func<TEntity, bool>> expression) where TEntity : class, IEntity
     {
         return await _db.Set<TEntity>().AnyAsync(expression);
     }
 
-    async public Task<bool> SaveChangesAsync()
+    public async Task<bool> SaveChangesAsync()
     {
         return await _db.SaveChangesAsync() >= 0;
     }
 
-    async Task<TEntity> IDbService.AddAsync<TEntity, TDto>(TDto dto)
+    public async Task<TEntity> AddAsync<TEntity, TDto>(TDto dto) where TEntity : class, IEntity where TDto : class
     {
         var entity = _mapper.Map<TEntity>(dto);
         await _db.Set<TEntity>().AddAsync(entity);
         return entity;
+    }
+
+    public void Update<TEntity, TDto>(int id, TDto dto) where TEntity : class, IEntity where TDto : class
+    {
+        var entity = _mapper.Map<TEntity>(dto);
+
     }
 }
