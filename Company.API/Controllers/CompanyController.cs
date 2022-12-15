@@ -15,7 +15,7 @@ public class CompanyController : ControllerBase
     [HttpGet]
     public async Task<IResult> Get()
     {
-       return await _db.HttpGetAsync<Data.Entities.Company, CompanyDTO>();
+        return await _db.HttpGetAsync<Data.Entities.Company, CompanyDTO>();
     }
 
     // GET api/<CompanyController>/5

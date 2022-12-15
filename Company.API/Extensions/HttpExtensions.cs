@@ -42,7 +42,7 @@ public static class HttpExtensions
         {
             if (await db.AnyAsync<TEntity>(e => e.Id.Equals(id)))
             {
-               db.Update<TEntity, TDto>(dto, id);
+                db.Update<TEntity, TDto>(dto, id);
                 if (await db.SaveChangesAsync())
                 {
                     return Results.NoContent();

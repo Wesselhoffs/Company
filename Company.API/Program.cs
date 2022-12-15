@@ -9,7 +9,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<CompanyContext>(options => 
+builder.Services.AddDbContext<CompanyContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("CompanyConnection")));
 
 ConfigureAutomapper(builder.Services);
