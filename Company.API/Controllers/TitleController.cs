@@ -4,94 +4,44 @@
 [ApiController]
 public class TitleController : ControllerBase
 {
-    private readonly CompanyContext _context;
+    private readonly IDbService _db;
 
-    public TitleController(CompanyContext context)
+    public TitleController(IDbService dbService)
     {
-        _context = context;
+        _db = dbService;
     }
-
-    // GET: api/Title
+    // GET: api/<TitleController>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Title>>> GetTitles()
+    public async Task<IResult> Get()
     {
-        return await _context.Titles.ToListAsync();
+        return await _db.HttpGetAsync<Title, TitleDTO>();
     }
 
-    // GET: api/Title/5
+    // GET api/<TitleController>/5
     [HttpGet("{id}")]
-    public async Task<ActionResult<Title>> GetTitle(int id)
+    public async Task<IResult> Get(int id)
     {
-        var title = await _context.Titles.FindAsync(id);
-
-        if (title == null)
-        {
-            return NotFound();
-        }
-
-        return title;
+        return await _db.HttpSingleAsync<Title, TitleDTO>(id);
     }
 
-    // PUT: api/Title/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPut("{id}")]
-    public async Task<IActionResult> PutTitle(int id, Title title)
-    {
-        if (id != title.Id)
-        {
-            return BadRequest();
-        }
-
-        _context.Entry(title).State = EntityState.Modified;
-
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!TitleExists(id))
-            {
-                return NotFound();
-            }
-            else
-            {
-                throw;
-            }
-        }
-
-        return NoContent();
-    }
-
-    // POST: api/Title
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    // POST api/<TitleController>
     [HttpPost]
-    public async Task<ActionResult<Title>> PostTitle(Title title)
+    public async Task<IResult> Post([FromBody] TitleDTO dto)
     {
-        _context.Titles.Add(title);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction("GetTitle", new { id = title.Id }, title);
+        return await _db.HttpAddAsync<Title, TitleDTO>(dto);
     }
 
-    // DELETE: api/Title/5
+    // PUT api/<TitleController>/5
+    [HttpPut("{id}")]
+    public async Task<IResult> Put(int id, [FromBody] TitleDTO dto)
+    {
+        return await _db.HttpUpdate<Title, TitleDTO>(dto, id);
+    }
+
+    // DELETE api/<TitleController>/5
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteTitle(int id)
+    public async Task<IResult> Delete(int id)
     {
-        var title = await _context.Titles.FindAsync(id);
-        if (title == null)
-        {
-            return NotFound();
-        }
-
-        _context.Titles.Remove(title);
-        await _context.SaveChangesAsync();
-
-        return NoContent();
-    }
-
-    private bool TitleExists(int id)
-    {
-        return _context.Titles.Any(e => e.Id == id);
+        return await _db.HttpDeleteAsync<Title>(id);
     }
 }

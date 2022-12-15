@@ -1,6 +1,6 @@
 ﻿namespace Company.Data.Entities;
 
-public class Title
+public class Title : IEntity
 {
     public int Id { get; set; }
     [MaxLength(50), Required]

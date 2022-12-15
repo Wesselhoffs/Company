@@ -4,108 +4,23 @@
 [ApiController]
 public class EmployeeTitleController : ControllerBase
 {
-    private readonly CompanyContext _context;
+    private readonly IDbService _db;
 
-    public EmployeeTitleController(CompanyContext context)
+    public EmployeeTitleController(IDbService dbService)
     {
-        _context = context;
+        _db = dbService;
     }
-
-    // GET: api/EmployeeTitle
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<EmployeeTitle>>> GetEmployeeTitles()
-    {
-        return await _context.EmployeeTitles.ToListAsync();
-    }
-
-    // GET: api/EmployeeTitle/5
-    [HttpGet("{id}")]
-    public async Task<ActionResult<EmployeeTitle>> GetEmployeeTitle(int id)
-    {
-        var employeeTitle = await _context.EmployeeTitles.FindAsync(id);
-
-        if (employeeTitle == null)
-        {
-            return NotFound();
-        }
-
-        return employeeTitle;
-    }
-
-    // PUT: api/EmployeeTitle/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPut("{id}")]
-    public async Task<IActionResult> PutEmployeeTitle(int id, EmployeeTitle employeeTitle)
-    {
-        if (id != employeeTitle.EmployeeId)
-        {
-            return BadRequest();
-        }
-
-        _context.Entry(employeeTitle).State = EntityState.Modified;
-
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!EmployeeTitleExists(id))
-            {
-                return NotFound();
-            }
-            else
-            {
-                throw;
-            }
-        }
-
-        return NoContent();
-    }
-
-    // POST: api/EmployeeTitle
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    // POST api/<EmployeeTitleController>
     [HttpPost]
-    public async Task<ActionResult<EmployeeTitle>> PostEmployeeTitle(EmployeeTitle employeeTitle)
+    public async Task<IResult> Post([FromBody] EmployeeTitleDTO employeeTitleDTO)
     {
-        _context.EmployeeTitles.Add(employeeTitle);
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateException)
-        {
-            if (EmployeeTitleExists(employeeTitle.EmployeeId))
-            {
-                return Conflict();
-            }
-            else
-            {
-                throw;
-            }
-        }
-
-        return CreatedAtAction("GetEmployeeTitle", new { id = employeeTitle.EmployeeId }, employeeTitle);
+        return await _db.HttpAddRefEntityAsync<EmployeeTitle, EmployeeTitleDTO>(employeeTitleDTO);
     }
 
-    // DELETE: api/EmployeeTitle/5
+    // DELETE api/<EmployeeTitleController>/5
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteEmployeeTitle(int id)
+    public async Task<IResult> Delete(EmployeeTitleDTO employeeTitleDTO)
     {
-        var employeeTitle = await _context.EmployeeTitles.FindAsync(id);
-        if (employeeTitle == null)
-        {
-            return NotFound();
-        }
-
-        _context.EmployeeTitles.Remove(employeeTitle);
-        await _context.SaveChangesAsync();
-
-        return NoContent();
-    }
-
-    private bool EmployeeTitleExists(int id)
-    {
-        return _context.EmployeeTitles.Any(e => e.EmployeeId == id);
+        return await _db.HttpDeleteAsync<EmployeeTitle, EmployeeTitleDTO>(employeeTitleDTO);
     }
 }

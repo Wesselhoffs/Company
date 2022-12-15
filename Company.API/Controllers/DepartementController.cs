@@ -4,94 +4,45 @@
 [ApiController]
 public class DepartementController : ControllerBase
 {
-    private readonly CompanyContext _context;
+    private readonly IDbService _db;
 
-    public DepartementController(CompanyContext context)
+    public DepartementController(IDbService dbService)
     {
-        _context = context;
+        _db = dbService;
     }
 
-    // GET: api/Departement
+    // GET: api/<DepartementController>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Departement>>> GetDepartements()
+    public async Task<IResult> Get()
     {
-        return await _context.Departements.ToListAsync();
+        return await _db.HttpGetAsync<Departement, DepartementDTO>();
     }
 
-    // GET: api/Departement/5
+    // GET api/<DepartementController>/5
     [HttpGet("{id}")]
-    public async Task<ActionResult<Departement>> GetDepartement(int id)
+    public async Task<IResult> Get(int id)
     {
-        var departement = await _context.Departements.FindAsync(id);
-
-        if (departement == null)
-        {
-            return NotFound();
-        }
-
-        return departement;
+        return await _db.HttpSingleAsync<Departement, DepartementDTO>(id);
     }
 
-    // PUT: api/Departement/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPut("{id}")]
-    public async Task<IActionResult> PutDepartement(int id, Departement departement)
-    {
-        if (id != departement.Id)
-        {
-            return BadRequest();
-        }
-
-        _context.Entry(departement).State = EntityState.Modified;
-
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!DepartementExists(id))
-            {
-                return NotFound();
-            }
-            else
-            {
-                throw;
-            }
-        }
-
-        return NoContent();
-    }
-
-    // POST: api/Departement
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    // POST api/<DepartementController>
     [HttpPost]
-    public async Task<ActionResult<Departement>> PostDepartement(Departement departement)
+    public async Task<IResult> Post([FromBody] DepartementDTO dto)
     {
-        _context.Departements.Add(departement);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction("GetDepartement", new { id = departement.Id }, departement);
+        return await _db.HttpAddAsync<Departement, DepartementDTO>(dto);
     }
 
-    // DELETE: api/Departement/5
+    // PUT api/<DepartementController>/5
+    [HttpPut("{id}")]
+    public async Task<IResult> Put(int id, [FromBody] DepartementDTO dto)
+    {
+        return await _db.HttpUpdate<Departement, DepartementDTO>(dto, id);
+    }
+
+    // DELETE api/<DepartementController>/5
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteDepartement(int id)
+    public async Task<IResult> Delete(int id)
     {
-        var departement = await _context.Departements.FindAsync(id);
-        if (departement == null)
-        {
-            return NotFound();
-        }
-
-        _context.Departements.Remove(departement);
-        await _context.SaveChangesAsync();
-
-        return NoContent();
-    }
-
-    private bool DepartementExists(int id)
-    {
-        return _context.Departements.Any(e => e.Id == id);
+        return await _db.HttpDeleteAsync<Departement>(id);
     }
 }
